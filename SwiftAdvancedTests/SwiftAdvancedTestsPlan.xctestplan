@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "53A8658E-5F92-4C5F-BF0D-E057E38303C6",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:SwiftAdvanced.xcodeproj",
+        "identifier" : "98CD7EC12EA572CA00E74524",
+        "name" : "SwiftAdvancedTests"
+      }
+    }
+  ],
+  "version" : 1
+}
