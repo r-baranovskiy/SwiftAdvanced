@@ -2,17 +2,11 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
-## User settings
-xcuserdata/
-
-## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
-*.xcscmblueprint
-*.xccheckout
-
-## compatibility with Xcode 3 and earlier (ignoring not required starting Xcode 4)
+## Build generated
 build/
 DerivedData/
-*.moved-aside
+
+## Various settings
 *.pbxuser
 !default.pbxuser
 *.mode1v3
@@ -21,11 +15,15 @@ DerivedData/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
+xcuserdata/
+
+## Other
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
 
 ## Obj-C/Swift specific
 *.hmap
-
-## App packaging
 *.ipa
 *.dSYM.zip
 *.dSYM
@@ -36,17 +34,17 @@ playground.xcworkspace
 
 # Swift Package Manager
 #
-# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
+# Add this line if you have SPM dependencies and don't want to check in the PackageResolved file
 # Package.resolved
-# *.xcodeproj
-#
-# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
-# hence it is not needed unless you have added a package configuration file to your project
-# .swiftpm
 
+# SwiftPM
 .build/
+*.xcodeproj
+!*.xcodeproj/project.xcworkspace/
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/xcuserdata/
+*.xcworkspace/contents.xcworkspacedata
+**/xcuserdata/
 
 # CocoaPods
 #
@@ -54,10 +52,7 @@ playground.xcworkspace
 # you should judge for yourself, the pros and cons are mentioned at:
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
 #
-Pods/
-#
-# Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
+# Pods/
 
 # Carthage
 #
@@ -66,16 +61,12 @@ Pods/
 
 Carthage/Build/
 
-# Accio dependency management
-Dependencies/
-.accio/
-
 # fastlane
 #
-# It is recommended to not store the screenshots in the git repo.
+# It is recommended to not store the screenshots in the git repository.
 # Instead, use fastlane to re-generate the screenshots whenever they are needed.
-# For more information about the recommended setup visit:
-# https://docs.fastlane.tools/best-practices/source-control/#source-control
+# For more information see the fastlane documentation:
+# https://docs.fastlane.tools/actions/capture_ios_screenshots/
 
 fastlane/report.xml
 fastlane/Preview.html
@@ -88,3 +79,36 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# Local configuration files
+*.orig
+
+# Project specific (добавьте пути к вашим локальным SPM пакетам если они в репозитории)
+# LocalSPMPackages/
+
+# App-specific
+*.app
+*.appex
+
+# Development certificates and profiles
+*.developerprofile
+*.p12
+*.mobileprovision
+
+# Analytics
+*.xcactivitylog
+
+# SwiftUI Previews
+*.swiftpm
+
+# Для модульной архитектуры с SPM
+**.swiftpm
+.xcode
+
+# Файлы конкретно для SPM модулей в основном проекте
+**/.build/
+**/.swiftpm/
+**/Package.resolved
+
+# Резервные копии
+*.backup
