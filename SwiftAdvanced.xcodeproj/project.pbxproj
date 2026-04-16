@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		55ED8B6D2F9D457F00B35149 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 55ED8B6C2F9D457F00B35149 /* NetworkLayer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		98CD7EC62EA572CA00E74524 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55ED8B6D2F9D457F00B35149 /* NetworkLayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,11 +83,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		55ED8B6B2F9D457F00B35149 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		98CD7E9C2EA5724E00E74524 = {
 			isa = PBXGroup;
 			children = (
 				98CD7EA72EA5724E00E74524 /* SwiftAdvanced */,
 				98CD7EC32EA572CA00E74524 /* SwiftAdvancedTests */,
+				55ED8B6B2F9D457F00B35149 /* Frameworks */,
 				550EA6DE2F9188FF001E38F1 /* SUIRendering */,
 				98CD7EA62EA5724E00E74524 /* Products */,
 			);
@@ -140,6 +153,7 @@
 			);
 			name = SwiftAdvanced;
 			packageProductDependencies = (
+				55ED8B6C2F9D457F00B35149 /* NetworkLayer */,
 			);
 			productName = SwiftAdvanced;
 			productReference = 98CD7EA52EA5724E00E74524 /* SwiftAdvanced.app */;
@@ -619,6 +633,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		55ED8B6C2F9D457F00B35149 /* NetworkLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NetworkLayer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 98CD7E9D2EA5724E00E74524 /* Project object */;
 }

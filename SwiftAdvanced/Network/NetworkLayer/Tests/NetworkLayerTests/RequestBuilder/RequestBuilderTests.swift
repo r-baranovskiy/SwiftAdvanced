@@ -12,12 +12,17 @@ final class RequestBuilderTests: XCTestCase
         let sut = env.makeSut(TestFactory.baseURL())
         let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
                                                       HTTPMethod: "GET")
-        
+        var request: URLRequest?
+
         // When
-        let request = sut
-            .httpMethod(.GET)
-            .buid()
-        
+        do {
+            request = try sut
+                .httpMethod(.GET)
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+
         // Then
         XCTAssertEqual(expectedRequest, request)
     }
@@ -32,12 +37,17 @@ final class RequestBuilderTests: XCTestCase
         let sut = env.makeSut(TestFactory.baseURL())
         let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
                                                       HTTPMethod: "POST")
-        
+        var request: URLRequest?
+
         // When
-        let request = sut
-            .httpMethod(.POST)
-            .buid()
-        
+        do {
+            request = try sut
+                .httpMethod(.POST)
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+
         // Then
         XCTAssertEqual(expectedRequest, request)
     }
@@ -51,12 +61,17 @@ final class RequestBuilderTests: XCTestCase
         let expectedURL = TestFactory.baseURL("/pictures")
         let sut = env.makeSut(TestFactory.baseURL())
         let expectedRequest = TestFactory.makeRequest(url: expectedURL, HTTPMethod: "GET")
-        
+        var request: URLRequest?
+
         // When
-        let request = sut
-            .path("/pictures")
-            .buid()
-        
+        do {
+            request = try sut
+                .path("pictures")
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+
         // Then
         XCTAssertEqual(expectedRequest, request)
     }
@@ -73,13 +88,18 @@ final class RequestBuilderTests: XCTestCase
         let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
                                                       HTTPMethod: "GET",
                                                       headers: expectedHeaders)
-        
+        var request: URLRequest?
+
         // When
-        let request = sut
-            .addHeader("API_Key", value: "123456")
-            .addHeader("Content-Type", value: "application/json")
-            .buid()
-        
+        do {
+            request = try sut
+                .addHeader("API_Key", value: "123456")
+                .addHeader("Content-Type", value: "application/json")
+                .buid()
+        } catch {
+            XCTAssertEqual(expectedRequest, request)
+        }
+
         // Then
         XCTAssertEqual(expectedRequest, request)
     }

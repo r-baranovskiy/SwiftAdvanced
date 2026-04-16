@@ -2,9 +2,10 @@ import Foundation
 
 public protocol IRequestBuilder: AnyObject
 {
-    func buid() -> URLRequest
+    func buid() throws -> URLRequest
     func httpMethod(_ method: HTTPMethod) -> Self
     func addHeader(_ key: String, value: String) -> Self
+    func query(_ items: [String: String]) -> Self
     func path(_ path: String) -> Self
 }
 
@@ -35,13 +36,28 @@ extension RequestBuilder: IRequestBuilder
         return self
     }
 
-    public func buid() -> URLRequest {
-        guard var url = URL(string: baseURL) else {
-            fatalError("Bad URL")
+    public func query(_ items: [String: String]) -> Self {
+        items.forEach {
+            config.queryItems.append(URLQueryItem(name: $0.key, value: $0.value))
+        }
+        return self
+    }
+
+    public func buid() throws -> URLRequest {
+        guard var components = URLComponents(string: baseURL) else {
+            throw NetworkClientError.invalidURL
         }
 
-        if let path = self.config.path {
-            url = url.appending(path: path)
+        if let path = config.path {
+            components.path.append(path)
+        }
+
+        if !config.queryItems.isEmpty {
+            components.queryItems = config.queryItems
+        }
+
+        guard let url = components.url else {
+            throw NetworkClientError.invalidURL
         }
 
         var request = URLRequest(url: url)
