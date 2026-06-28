@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "E4DFCE58-6839-440C-94C1-1496ACAC627B",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "NetworkLayerTests",
+        "name" : "NetworkLayerTests"
+      }
+    }
+  ],
+  "version" : 1
+}
