@@ -33,7 +33,7 @@ extension NetworkClient: INetworkClient
         }
 
         guard case .successResponse = clientResponse else {
-            throw clientResponse
+            throw NetworkClientError.NetworkCodeError(statusCode: clientResponse.statusCode)
         }
 
         return try await self.processingDecode(for: data)
@@ -51,10 +51,14 @@ private extension NetworkClient {
             return result
         } catch let error as DecodingError {
             throw self.prepareDecodingError(for: T.self, and: error)
+        } catch let error as URLError {
+            throw self.prepareUrlError(from: error)
         }
     }
 
-    func prepareDecodingError<T: Decodable>(for type: T.Type, and error: DecodingError) -> Error {
+    func prepareDecodingError<T: Decodable>(
+        for type: T.Type, and error: DecodingError
+    ) -> NetworkClientError {
         switch error {
         case .typeMismatch(let any, let context):
             NetworkClientError.decodingError(
@@ -71,6 +75,27 @@ private extension NetworkClient {
             NetworkClientError.decodingError(
                 description: "Failed to decode \(T.self): \(error.localizedDescription)"
             )
+        }
+    }
+
+    func prepareUrlError(
+        from error: URLError
+    ) -> NetworkClientError.TransportError {
+        switch error.code {
+        case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
+                .offline
+        case .secureConnectionFailed, .serverCertificateHasBadDate, .serverCertificateUntrusted, .serverCertificateHasUnknownRoot:
+                .tlsFailure
+        case .timedOut:
+                .timeout
+        case .dnsLookupFailed, .cannotFindHost:
+                .dnsFailure
+        case .cannotConnectToHost:
+                .cannotConnect
+        case .cancelled:
+                .cancelled
+        default:
+                .unknown
         }
     }
 }
