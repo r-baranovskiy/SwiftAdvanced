@@ -3,10 +3,8 @@ import XCTest
 
 final class NetworkClientTests: XCTestCase
 {
-    /*
-     Тест проверяет, что если в ответе будет статус код 4хх
-     то получим ошибку NetworkCodeError.clientError
-     */
+    /// Тест проверяет, что если в ответе будет статус код 4хх
+    /// то получим ошибку `StatusCodeError.clientError`
     func test_for4xxStatusCodes_requestThrowsClientError() async {
         // Given
         let env = Environment()
@@ -16,8 +14,8 @@ final class NetworkClientTests: XCTestCase
         // When
         for code in receivedCodes {
             let expectation = expectation(description: "Test code expectation \(code)")
-            let expectedError = NetworkClientError.NetworkCodeError.clientError(code: code)
-            var receivedError: NetworkClientError.NetworkCodeError?
+            let expectedError = NetworkClientError.codeError(error: .clientError(code: code))
+            var receivedError: NetworkClientError?
             
             MockURLProtocol.requestHandler = { request in
                 let response = HTTPURLResponse(url: request.url!,
@@ -28,9 +26,11 @@ final class NetworkClientTests: XCTestCase
             }
             
             do {
-                let _: MockResponse = try await sut.request(for: TestFactory.urlRequest, with: nil)
+                let _: MockResponse = try await sut
+                    .request(for: TestFactory.urlRequest, with: nil)
+                    .prepareData()
             } catch {
-                receivedError = error as? NetworkClientError.NetworkCodeError
+                receivedError = error as? NetworkClientError
                 expectation.fulfill()
             }
 
@@ -40,10 +40,8 @@ final class NetworkClientTests: XCTestCase
         }
     }
 
-    /*
-     Тест проверяет, что если в ответе будет статус код 5хх
-     то получим ошибку NetworkCodeError.serverError
-     */
+     /// Тест проверяет, что если в ответе будет статус код 5хх
+     /// то получим ошибку `StatusCodeError.serverError`
     func test_for5xxStatusCodes_requestThrowsServerError() async {
         // Given
         let env = Environment()
@@ -53,8 +51,8 @@ final class NetworkClientTests: XCTestCase
         // When
         for code in receivedCodes {
             let expectation = expectation(description: "Test code expectation \(code)")
-            let expectedError = NetworkClientError.NetworkCodeError.serverError(code: code)
-            var receivedError: NetworkClientError.NetworkCodeError?
+            let expectedError = NetworkClientError.codeError(error: .serverError(code: code))
+            var receivedError: NetworkClientError?
             
             MockURLProtocol.requestHandler = { request in
                 let response = HTTPURLResponse(url: request.url!,
@@ -65,9 +63,11 @@ final class NetworkClientTests: XCTestCase
             }
             
             do {
-                let _: MockResponse = try await sut.request(for: TestFactory.urlRequest, with: nil)
+                let _: MockResponse = try await sut
+                    .request(for: TestFactory.urlRequest, with: nil)
+                    .prepareData()
             } catch {
-                receivedError = error as? NetworkClientError.NetworkCodeError
+                receivedError = error as? NetworkClientError
                 expectation.fulfill()
             }
 
@@ -77,10 +77,8 @@ final class NetworkClientTests: XCTestCase
         }
     }
 
-    /*
-     Тест проверяет, что для 200 статуса и корректных декодируемых свойств
-     вернется ожидаемая модель данных
-     */
+    /// Тест проверяет, что для 200 статуса и корректных декодируемых свойств
+    /// вернется ожидаемая модель данных`
     func test_for200StatusCode_requestSuccessDecodingData() async {
         // Given
         let env = Environment()
@@ -98,7 +96,9 @@ final class NetworkClientTests: XCTestCase
 
         // When
         do {
-            receivedResponse = try await sut.request(for: TestFactory.urlRequest, with: nil)
+            receivedResponse = try await sut
+                .request(for: TestFactory.urlRequest, with: nil)
+                .prepareData()
             expectation.fulfill()
         } catch {
             XCTFail(error.localizedDescription)
@@ -118,7 +118,7 @@ final class NetworkClientTests: XCTestCase
         let env = Environment()
         let sut = env.makeSut()
         let expectation = expectation(description: #function)
-        let expectedError = NetworkClientError.decodingError(description: "")
+        let expectedError = NetworkClientError.decodingError(error: .default(description: ""))
         var receivedError: NetworkClientError?
         
         MockURLProtocol.requestHandler = { request in
@@ -131,7 +131,9 @@ final class NetworkClientTests: XCTestCase
 
         // When
         do {
-            let _: MockResponse? = try await sut.request(for: TestFactory.urlRequest, with: nil)
+            let _: MockResponse? = try await sut
+                .request(for: TestFactory.urlRequest, with: nil)
+                .prepareData()
             XCTFail("Сюда попасть не должны")
         } catch {
             receivedError = error as? NetworkClientError

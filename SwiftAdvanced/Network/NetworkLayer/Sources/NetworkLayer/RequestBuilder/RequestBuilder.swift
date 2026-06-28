@@ -7,6 +7,9 @@ public protocol IRequestBuilder: AnyObject
     func addHeader(_ key: String, value: String) -> Self
     func query(_ items: [String: String]) -> Self
     func path(_ path: String) -> Self
+    func contentType(_ type: ContentType) -> Self
+    func authorizationBearer(_ token: String) -> Self
+    func body(_ data: Data) -> Self
 }
 
 public final class RequestBuilder
@@ -43,6 +46,21 @@ extension RequestBuilder: IRequestBuilder
         return self
     }
 
+    public func contentType(_ type: ContentType) -> Self {
+        self.config.headers["Content-Type"] = type.rawValue
+        return self
+    }
+
+    public func authorizationBearer(_ token: String) -> Self {
+        self.config.headers["Authorization"] = "Bearer \(token)"
+        return self
+    }
+
+    public func body(_ data: Data) -> Self {
+        self.config.body = data
+        return self
+    }
+
     public func buid() throws -> URLRequest {
         guard var components = URLComponents(string: baseURL) else {
             throw NetworkClientError.invalidURL
@@ -62,7 +80,8 @@ extension RequestBuilder: IRequestBuilder
 
         var request = URLRequest(url: url)
         request.allHTTPHeaderFields = self.config.headers
-        request.httpMethod = self.config.method.rawValue
+        request.httpMethod = self.config.method.rawValue.uppercased()
+        request.httpBody = self.config.body
         return request
     }
 }

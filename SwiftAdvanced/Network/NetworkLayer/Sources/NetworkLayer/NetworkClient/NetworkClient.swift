@@ -2,8 +2,31 @@ import Foundation
 
 public protocol INetworkClient: AnyObject
 {
-    func request<T: Decodable>(for request: URLRequest,
-                               with logger: INetworkClientLogger?) async throws -> T
+    /// Выполняет сетевой запрос и возвращает сырые данные.
+    ///
+    /// Метод отправляет HTTP-запрос, проверяет статус-код ответа и, в случае успеха (2xx),
+    /// возвращает полученные данные. В случае ошибки выбрасывает соответствующее исключение.
+    ///
+    /// - Parameters:
+    ///   - request: `URLRequest` с настроенными заголовками, методом и телом запроса
+    ///   - logger: Опциональный логгер для логирования запроса в формате cURL.
+    ///             Если передан, метод залогирует запрос через `logger.logCurl(from:)`
+    ///
+    /// - Returns: Сырые `Data` из тела ответа сервера при успешном запросе (статус-код 2xx)
+    ///
+    /// - Throws: `NetworkClientError` при различных ошибках выполнения запроса:
+    ///   - `.badResponse` — если ответ сервера не является HTTP-ответом
+    ///   - `.NetworkCodeError(statusCode:)` — для статус-кодов вне диапазона 2xx (200-299)
+    ///   - `.transportError(TransportError)` — при сетевых ошибках:
+    ///     - `.offline` — нет подключения к интернету
+    ///     - `.timeout` — таймаут запроса
+    ///     - `.tlsFailure` — ошибка SSL/TLS сертификата
+    ///     - `.dnsFailure` — не удалось разрешить DNS-имя
+    ///     - `.cannotConnect` — не удалось подключиться к хосту
+    ///     - `.cancelled` — запрос был отменен
+    ///     - `.unknown` — неизвестная сетевая ошибка
+    func request(for request: URLRequest,
+                 with logger: INetworkClientLogger?) async throws -> NetworkClientResponse
 }
 
 public final class NetworkClient
@@ -20,67 +43,31 @@ public final class NetworkClient
 
 extension NetworkClient: INetworkClient
 {
-    public func request<T: Decodable>(for request: URLRequest,
-                                      with logger: INetworkClientLogger?) async throws -> T {
-        let (data, response) = try await session.data(for: request)
-        guard let response = response as? HTTPURLResponse else {
-            throw NetworkClientError.badResponse
-        }
-        let clientResponse = NetworkClientServerResponse(urlReponse: response)
-
-        if let logger {
-            logger.logCurl(from: request)
-        }
-
-        guard case .successResponse = clientResponse else {
-            throw NetworkClientError.NetworkCodeError(statusCode: clientResponse.statusCode)
-        }
-
-        return try await self.processingDecode(for: data)
-    }
-}
-
-// MARK: - Private
-
-private extension NetworkClient {
-    func processingDecode<T: Decodable>(
-        for data: Data
-    ) async throws -> T {
+    public func request(for request: URLRequest,
+                        with logger: INetworkClientLogger?) async throws -> NetworkClientResponse {
         do {
-            let result = try decoder.decode(T.self, from: data)
-            return result
-        } catch let error as DecodingError {
-            throw self.prepareDecodingError(for: T.self, and: error)
+            let (data, response) = try await session.data(for: request)
+            guard let response = response as? HTTPURLResponse else {
+                throw NetworkClientError.badResponse
+            }
+            let clientResponse = NetworkClientResponse(urlReponse: response, data: data)
+
+            if let logger {
+                logger.logCurl(from: request)
+            }
+
+            return clientResponse
         } catch let error as URLError {
             throw self.prepareUrlError(from: error)
         }
     }
+}
 
-    func prepareDecodingError<T: Decodable>(
-        for type: T.Type, and error: DecodingError
-    ) -> NetworkClientError {
-        switch error {
-        case .typeMismatch(let any, let context):
-            NetworkClientError.decodingError(
-                description: "Type mismatch for type \(any) in \(T.self) at path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
-        case .valueNotFound(let any, let context):
-            NetworkClientError.decodingError(
-                description: "Value not found for type \(any) in \(T.self) at path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
-            )
-        case .keyNotFound(let codingKey, let context):
-            NetworkClientError.decodingError(
-                description: "Missing key '\(codingKey.stringValue)' in \(T.self) at path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
-            )
-        default:
-            NetworkClientError.decodingError(
-                description: "Failed to decode \(T.self): \(error.localizedDescription)"
-            )
-        }
-    }
-
+// MARK: - Private
+private extension NetworkClient {
     func prepareUrlError(
         from error: URLError
-    ) -> NetworkClientError.TransportError {
+    ) -> TransportError {
         switch error.code {
         case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed:
                 .offline

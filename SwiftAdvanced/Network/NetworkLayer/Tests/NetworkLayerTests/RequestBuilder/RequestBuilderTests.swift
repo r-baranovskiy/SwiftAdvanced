@@ -17,7 +17,7 @@ final class RequestBuilderTests: XCTestCase
         // When
         do {
             request = try sut
-                .httpMethod(.GET)
+                .httpMethod(.get)
                 .buid()
         } catch {
             XCTFail(error.localizedDescription)
@@ -42,7 +42,7 @@ final class RequestBuilderTests: XCTestCase
         // When
         do {
             request = try sut
-                .httpMethod(.POST)
+                .httpMethod(.post)
                 .buid()
         } catch {
             XCTFail(error.localizedDescription)
@@ -97,7 +97,86 @@ final class RequestBuilderTests: XCTestCase
                 .addHeader("Content-Type", value: "application/json")
                 .buid()
         } catch {
-            XCTAssertEqual(expectedRequest, request)
+            XCTFail(error.localizedDescription)
+        }
+
+        // Then
+        XCTAssertEqual(expectedRequest, request)
+    }
+
+    /**
+     Тест проверяет, что реквест корректно создается если добавить `Content-Type`
+    */
+    func test_makeRequest_withContentType_correctCreated() {
+        // Given
+        let env = Environment()
+        let sut = env.makeSut(TestFactory.baseURL())
+        let expectedHeaders = ["Content-Type": "multipart/form-data"]
+        let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
+                                                      HTTPMethod: "POST",
+                                                      headers: expectedHeaders)
+        var request: URLRequest?
+
+        // When
+        do {
+            request = try sut
+                .contentType(.multipart)
+                .httpMethod(.post)
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+
+        // Then
+        XCTAssertEqual(expectedRequest, request)
+    }
+
+    /**
+     Тест проверяет, что реквест корректно создается если добавить `Authorization`
+    */
+    func test_makeRequest_withAuthorization_correctCreated() {
+        // Given
+        let env = Environment()
+        let sut = env.makeSut(TestFactory.baseURL())
+        let expectedHeaders = ["Authorization": "Bearer 123456"]
+        let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
+                                                      HTTPMethod: "GET",
+                                                      headers: expectedHeaders)
+        var request: URLRequest?
+
+        // When
+        do {
+            request = try sut
+                .authorizationBearer("123456")
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+
+        // Then
+        XCTAssertEqual(expectedRequest, request)
+    }
+
+    /**
+     Тест проверяет, что реквест корректно создается если добавить `Body`
+    */
+    func test_makeRequest_withBody_correctCreated() {
+        // Given
+        let env = Environment()
+        let sut = env.makeSut(TestFactory.baseURL())
+        let expectedRequest = TestFactory.makeRequest(url: TestFactory.baseURL(),
+                                                      HTTPMethod: "POST",
+                                                      body: TestFactory.testData)
+        var request: URLRequest?
+
+        // When
+        do {
+            request = try sut
+                .body(TestFactory.testData)
+                .httpMethod(.post)
+                .buid()
+        } catch {
+            XCTFail(error.localizedDescription)
         }
 
         // Then
@@ -119,6 +198,8 @@ private extension RequestBuilderTests
 {
     enum TestFactory
     {
+        static let testData = "{\"key\":\"value\"}".data(using: .utf8)!
+
         static func baseURL(_ path: String = "") -> URL {
             let baseURL: URL = URL(string: "https://google.com")!
                 .appending(path: path)
@@ -127,10 +208,12 @@ private extension RequestBuilderTests
 
         static func makeRequest(url: URL,
                                 HTTPMethod: String,
-                                headers: [String: String] = [:]) -> URLRequest {
+                                headers: [String: String] = [:],
+                                body: Data? = nil) -> URLRequest {
             var request = URLRequest(url: url)
             request.httpMethod = HTTPMethod
             request.allHTTPHeaderFields = headers
+            request.httpBody = body
             return request
         }
     }
